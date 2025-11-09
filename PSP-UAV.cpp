@@ -12,20 +12,23 @@
 #include <algorithm>
 #include <random>
 #include <limits>
+#include <filesystem>   // <-- NUEVO
+namespace fs = std::filesystem;
 
 // Programa principal para resolver el problema PSP-UAV usando un algoritmo genético basado en el paper.
 int main(int argc, char** argv) {
     // Uso base: ./PSP-UAV <instancia.txt> <max_drones> <K> <T>
-    // Opcionales: --seed=123 --gen=40 --pop=200 --Nmult=2 --csv=resultados.csv --tag=run1
+    // Opcionales:
+    //   --seed=123    --gen=40     --pop=200     --Nmult=3
+    //   --csv=salida.csv  --tag=run1  --dump=archivo.json  --outdir=resultados/showcase
     if (argc < 5) {
         std::cerr << "Uso: " << argv[0]
                   << " <instancia.txt> <max_drones> <K> <T> [opciones]\n"
                   << "Ejemplo: " << argv[0]
-                  << " instancias/PSP-UAV_01_a.txt 5 1000 50 --gen=60 --pop=200 --csv=salida.csv --tag=casoA\n";
+                  << " instancias/PSP-UAV_01_a.txt 5 1000 50 --gen=20 --pop=100 --outdir=resultados/showcase\n";
         return 1;
     }
 
-    // Parseo de argumentos
     try {
         // --- CLI obligatorios
         const std::string path = argv[1];
@@ -35,12 +38,13 @@ int main(int argc, char** argv) {
 
         // --- CLI opcionales
         unsigned seed = 12345;
-        int generations_override = -1;  // -1 => usa mapping desde K
-        int population_override  = -1;  // -1 => 100
-        int Nmult = 3;                  // N = m + (m/Nmult); ej 3 => 1.33*m | si pones 1 => 2*m
-        std::string csv_path = "";      // vacío => no loggea
-        std::string tag = "";           // etiqueta libre
-        std::string dump_json = "";    // si no vacío, vuelca snapshot JSON a esa ruta
+        int generations_override = -1;   // -1 => usa mapping desde K
+        int population_override  = -1;   // -1 => 100
+        int Nmult = 3;                   // N = m + (m/Nmult); ej 3 => ~1.33*m | si pones 1 => 2*m
+        std::string csv_path = "";       // vacío => no loggea
+        std::string tag = "";            // etiqueta libre
+        std::string dump_json = "";      // si no vacío, vuelca snapshot JSON a esa ruta
+        std::string outdir    = "resultados/showcase"; // <-- NUEVO (carpeta por defecto)
 
         // Parseo opciones
         for (int i=5; i<argc; ++i) {
@@ -50,13 +54,14 @@ int main(int argc, char** argv) {
                 if (p==0) return a.substr(key.size());
                 return "";
             };
-            if (a.rfind("--seed=",0)==0) { seed = (unsigned)std::stoul(take("--seed=")); }
-            else if (a.rfind("--gen=",0)==0) { generations_override = std::stoi(take("--gen=")); }
-            else if (a.rfind("--pop=",0)==0) { population_override  = std::stoi(take("--pop=")); }
-            else if (a.rfind("--Nmult=",0)==0){ Nmult = std::max(1, std::stoi(take("--Nmult="))); }
-            else if (a.rfind("--csv=",0)==0) { csv_path = take("--csv="); }
-            else if (a.rfind("--tag=",0)==0) { tag = take("--tag="); }
-            else if (a.rfind("--dump=",0)==0) { dump_json = take("--dump="); }
+            if (a.rfind("--seed=",0)==0)       { seed = (unsigned)std::stoul(take("--seed=")); }
+            else if (a.rfind("--gen=",0)==0)   { generations_override = std::stoi(take("--gen=")); }
+            else if (a.rfind("--pop=",0)==0)   { population_override  = std::stoi(take("--pop=")); }
+            else if (a.rfind("--Nmult=",0)==0) { Nmult = std::max(1, std::stoi(take("--Nmult="))); }
+            else if (a.rfind("--csv=",0)==0)   { csv_path = take("--csv="); }
+            else if (a.rfind("--tag=",0)==0)   { tag = take("--tag="); }
+            else if (a.rfind("--dump=",0)==0)  { dump_json = take("--dump="); }
+            else if (a.rfind("--outdir=",0)==0){ outdir    = take("--outdir="); } // <-- NUEVO
         }
 
         Timer T_all; // tiempo total
@@ -72,7 +77,7 @@ int main(int argc, char** argv) {
 
         // =========================
         print_section("LOAD INSTANCE");
-        Timer T_load; 
+        Timer T_load;
         Instance instancia = loadInstance(path);
         double t_load = T_load.elapsed();
         print_kv("rows", instancia.rows);
@@ -89,9 +94,9 @@ int main(int argc, char** argv) {
         print_kv("t_load_s", t_load, 6);
 
         // =========================
-        print_section("SITES + D (8-neigh BFS)"); // construcción de sitios y matriz de distancias
+        print_section("SITES + D (8-neigh BFS)");
         Timer T_sites;
-        auto data = buildPVPData(instancia); // sitios + distancias
+        auto data = buildPVPData(instancia);
         double t_sites = T_sites.elapsed();
         int m = (int)data.sites.size();
         print_kv("m_sites", m);
@@ -103,7 +108,7 @@ int main(int argc, char** argv) {
         }
 
         // =========================
-        print_section("GA (paper)"); // ejecución del algoritmo genético
+        print_section("GA (paper)");
         // Largo del walk (N): m + m/Nmult (si Nmult=1 => 2*m, si Nmult=3 => ~1.33*m)
         int N = m + m / std::max(1, Nmult);
         // pesos
@@ -111,12 +116,12 @@ int main(int argc, char** argv) {
         for (int i=0; i<m; ++i) weights[i] = data.sites[i].w;
 
         GAParams params;
-        params.population  = (population_override>0 ? population_override : 100); // tamaño población según el paper
-        params.generations = (generations_override>0 ? generations_override  // número de generaciones según el paper
+        params.population  = (population_override>0 ? population_override : 100);
+        params.generations = (generations_override>0 ? generations_override
                             : std::max(1, (int)std::min<long long>(50, K/50))); // K=1000 => ~20
-        params.pcross = 0.70; // probabilidad de cruce según el paper
-        params.pmut   = 0.01; // probabilidad de mutación según el paper
-        params.seed   = seed; // semilla del RNG
+        params.pcross = 0.70;
+        params.pmut   = 0.01;
+        params.seed   = seed;
 
         print_kv("population", params.population);
         print_kv("generations", params.generations);
@@ -125,7 +130,7 @@ int main(int argc, char** argv) {
         print_kv("N", N);
 
         Timer T_ga;
-        auto ga = run_ga_pvp(data.dist, weights, m, N, params); // ejecución GA
+        auto ga = run_ga_pvp(data.dist, weights, m, N, params);
         double t_ga = T_ga.elapsed();
 
         print_kv("best_cost", ga.bestCost, 6);
@@ -142,12 +147,12 @@ int main(int argc, char** argv) {
         std::cout << "\n";
 
         // =========================
-        print_section("SIMULATION (urgency accumulation)"); // simula rutas de drones sobre el kernel derivado del bestWalk
+        print_section("SIMULATION (urgency accumulation)");
         Timer T_sim;
-        auto kernel = kernel_from_walk(instancia, data, ga.bestWalk); // kernel (ruta completa)
-        auto rutas  = assign_drones_on_kernel(kernel, max_drones, T); // asigna drones sobre el kernel
-        double urg_total = simulate_urgency_accum(instancia, rutas, T); // simula y obtiene urgencia total  
-        double t_sim = T_sim.elapsed(); // tiempo de simulación
+        auto kernel = kernel_from_walk(instancia, data, ga.bestWalk);
+        auto rutas  = assign_drones_on_kernel(kernel, max_drones, T);
+        double urg_total = simulate_urgency_accum(instancia, rutas, T);
+        double t_sim = T_sim.elapsed();
 
         print_kv("urg_total", urg_total, 3);
         print_kv("kernel_len", (long long)kernel.size());
@@ -157,8 +162,8 @@ int main(int argc, char** argv) {
         if (!rutas.empty()) {
             std::cout << "  D0[0..min(20)]: ";
             for (int i=0; i<std::min(20, T); ++i) {
-                auto [r,c]=rutas[0][i];
-                std::cout<<"("<<r<<","<<c<<") ";
+                auto [rr,cc]=rutas[0][i];
+                std::cout<<"("<<rr<<","<<cc<<") ";
             }
             std::cout << "\n";
         }
@@ -183,10 +188,24 @@ int main(int argc, char** argv) {
             std::cout << "CSV -> " << csv_path << "\n";
         }
 
-        if (!dump_json.empty()) {
-            dump_run_snapshot(dump_json, instancia, data, max_drones, T, ga.bestWalk, kernel, rutas);
-            std::cout << "Dump JSON -> " << dump_json << "\n";
+        // =========================
+        // HOOK de snapshot JSON (para visualización / animación)
+        // Si no se entregó --dump, generamos un nombre automático dentro de outdir
+        if (dump_json.empty()) {
+            try { fs::create_directories(outdir); } catch (...) { /* no fatal */ }
+            fs::path inst_path(path);
+            std::string base = inst_path.stem().string(); // ej: PSP-UAV_01_a
+            // Nombre: <inst>_g<gen>_p<pop>_n<Nmult>_s<seed>_snap.json
+            dump_json = (fs::path(outdir) /
+                        (base + "_g" + s(params.generations) +
+                                "_p" + s(params.population) +
+                                "_n" + s(Nmult) +
+                                "_s" + s(seed) + "_snap.json")).string();
         }
+
+        dump_run_snapshot(dump_json, instancia, data, max_drones, T,
+                          ga.bestWalk, kernel, rutas);
+        std::cout << "Dump JSON -> " << dump_json << "\n";
 
         return 0;
     } catch (const std::exception& ex) {

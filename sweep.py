@@ -57,7 +57,7 @@ def sweep():
         rc = run_cmd(cmd)
         GENERAR_PNGS = True
         if GENERAR_PNGS:
-            subprocess.run(["python", "viz_snapshot.py", str(SNAP_DIR / (tag + "_snap.json"))])
+            subprocess.run(["python", "vis_snapshot.py", str(SNAP_DIR / (tag + "_snap.json"))])
 
 
         # Si quieres que falle en el primer error:

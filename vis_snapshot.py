@@ -4,6 +4,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 import numpy as np
+
 def load_snapshot(path):
     with open(path, "r") as f:
         return json.load(f)
@@ -112,7 +113,7 @@ def mask_obstacles(M, obstacles):
     return X
 
 
-# ---------- Main function ----------
+# ---------- Main ----------
 
 def save_all_figures(snap_path):
     with open(snap_path, "r") as f:

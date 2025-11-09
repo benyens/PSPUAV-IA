@@ -1,7 +1,7 @@
 # ===========================================
 #  PSP-UAV  | Proyecto IA-PSP 2025
 # ===========================================
-.PHONY: all clean deepclean runs sweep viz resultsclean
+.PHONY: all clean deepclean runs sweep vis showcase resultsclean
 
 # ---------- COMPILADOR ----------
 CXX := g++
@@ -13,13 +13,15 @@ HDRS := instance.hpp sites.hpp pvp_ga.hpp pvp_fitness.hpp pvp_chromosome.hpp sim
 # ---------- PYTHON ----------
 PYTHON := python
 SWEEP := sweep.py
-VIZ := viz_snapshot.py
+VIS := vis_snapshot.py
+SHOWCASE := showcase.py
 
 # ---------- DIRECTORIOS ----------
 INSTDIR := instancias
 RESDIR := resultados
+SHOWDIR := $(RESDIR)/showcase
 PDFDIR := $(RESDIR)/pdfs
-SNAPDIR := $(RESDIR)/snaps
+SNAPDIR := $(RESDIR)/snapshots
 
 # ---------- COMPILAR ----------
 all: $(TARGET)
@@ -31,48 +33,63 @@ $(TARGET): $(SRCS) $(HDRS)
 
 # ---------- LIMPIEZAS ----------
 clean:
-	@echo "Limpiando binarios y objetos..."
+	@echo "Limpiando binarios..."
 	@rm -f $(TARGET)
-	@echo "Limpieza básica lista."
+	@echo "Limpieza básica completa."
 
-resultsclean: 
+resultsclean:
 	@echo "Limpiando solo resultados experimentales..."
 	@rm -rf $(RESDIR)
 	@rm -f *.csv *.json *.png *.pdf
-	@echo "Resultados experimentales limpios."
+	@echo "Resultados experimentales eliminados."
 
 deepclean: clean
-	@echo "Limpiando resultados experimentales..."
+	@echo "Limpieza total..."
 	@rm -rf $(RESDIR)
 	@rm -f *.csv *.json *.png *.pdf
 	@echo "Todo limpio (binarios + resultados + gráficos)."
 
-
-# ---------- CORRIDAS RÁPIDAS ----------
+# ---------- RUNS RÁPIDOS ----------
 run1a: $(TARGET)
-	./$(TARGET) $(INSTDIR)/PSP-UAV_01_a.txt 5 1000 50
+	./$(TARGET) $(INSTDIR)/PSP-UAV_01_a.txt 5 1000 50 --seed=7 --gen=20 --pop=100 --outdir=$(SHOWDIR)
 run1b: $(TARGET)
-	./$(TARGET) $(INSTDIR)/PSP-UAV_01_b.txt 5 1000 50
+	./$(TARGET) $(INSTDIR)/PSP-UAV_01_b.txt 5 1000 50 --outdir=$(SHOWDIR)
 run2a: $(TARGET)
-	./$(TARGET) $(INSTDIR)/PSP-UAV_02_a.txt 10 1000 50
+	./$(TARGET) $(INSTDIR)/PSP-UAV_02_a.txt 10 1000 50 --outdir=$(SHOWDIR)
 run2b: $(TARGET)
-	./$(TARGET) $(INSTDIR)/PSP-UAV_02_b.txt 10 1000 50
+	./$(TARGET) $(INSTDIR)/PSP-UAV_02_b.txt 10 1000 50 --outdir=$(SHOWDIR)
 run3a: $(TARGET)
-	./$(TARGET) $(INSTDIR)/PSP-UAV_03_a.txt 15 1000 50
+	./$(TARGET) $(INSTDIR)/PSP-UAV_03_a.txt 15 1000 50 --outdir=$(SHOWDIR)
 run3b: $(TARGET)
-	./$(TARGET) $(INSTDIR)/PSP-UAV_03_b.txt 15 1000 50
+	./$(TARGET) $(INSTDIR)/PSP-UAV_03_b.txt 15 1000 50 --outdir=$(SHOWDIR)
+
+# ---------- SHOWCASE (corre y visualiza la última instancia) ----------
+showcase: 
+	@echo "Limpiando rastros de algún showcase anterior..."
+	@rm -rf $(SHOWDIR)
+	@rm -f *.csv *.json *.png *.pdf
+	make run1a
+	@echo "Ejecutando showcase y generando visualización..."
+	@latest=$$(ls -t $(SHOWDIR)/*.json 2>/dev/null | head -n1); \
+	if [ -z "$$latest" ]; then \
+	    echo "No hay snapshots en $(SHOWDIR)/. Ejecuta make run1a o cualquier otra instancia."; \
+	else \
+	    echo "Usando snapshot: $$latest"; \
+	    $(PYTHON) $(SHOWCASE) --animate --fps 60; \
+		$(PYTHON)  $(VIS) "$$latest"; \
+	fi
 
 # ---------- BARRIDO Y VISUALIZACIÓN ----------
 sweep: $(TARGET) $(SWEEP)
-	@echo "Corriento todo para experimentar..."
+	@echo "Corriendo barrido completo de experimentos..."
 	$(PYTHON) $(SWEEP)
 
-viz: $(VIZ)
+vis: $(VIS)
 	@echo "Visualizando snapshot más reciente..."
 	@latest=$$(ls -t $(SNAPDIR)/*.json 2>/dev/null | head -n1); \
 	if [ -z "$$latest" ]; then \
-	    echo "No hay JSONs en $(SNAPDIR)/. Ejecuta primero un --dump o make sweep."; \
+	    echo "No hay JSONs en $(SNAPDIR)/. Ejecuta primero un run con --dump o make showcase."; \
 	else \
 	    echo "Mostrando $$latest"; \
-	    $(PYTHON) $(VIZ) "$$latest"; \
+	    $(PYTHON) $(VIS) "$$latest"; \
 	fi
