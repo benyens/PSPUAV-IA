@@ -1,12 +1,5 @@
 # PSP-UAV – Optimización de Patrullaje mediante Algoritmo Genético
 
-**Autor:** Benjamín Ferrada Larach  
-**Curso:** INF-285 – Inteligencia Artificial  
-**Institución:** Universidad Técnica Federico Santa María  
-**Semestre:** 2025-2  
-
----
-
 ## 1. Descripción general
 
 Este proyecto implementa una solución al **problema PSP-UAV (Patrolling Scheduling Problem for Unmanned Aerial Vehicles)**, cuyo objetivo es **maximizar la cobertura de celdas con distintos niveles de urgencia** utilizando un número limitado de drones en un entorno discretizado con obstáculos.
