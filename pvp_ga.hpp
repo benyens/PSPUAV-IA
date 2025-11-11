@@ -49,7 +49,7 @@ inline GAResult run_ga_pvp(const std::vector<std::vector<int>>& D, const std::ve
     std::mt19937 rng(P.seed);
 
     auto eval = [&](const Chromosome& c)->std::pair<double, std::vector<int>>{
-        auto walk = decode(c);
+        auto walk = decode(c); // Aquí se decodifica el cromosoma.
         double cost = cost_max_weighted_revisit(walk, D, w);
         return {cost, std::move(walk)};
     };

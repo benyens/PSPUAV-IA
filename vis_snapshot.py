@@ -96,7 +96,7 @@ def draw_routes(ax, routes, max_drones_to_show=5):
         ax.scatter([xs[0]], [ys[0]], s=36, marker='s', color=colors[d % len(colors)])
 
 def compute_visit_heat(rows, cols, routes):
-    """Matriz H[r,c] = # de visitas de cualquier dron a la celda (r,c)."""
+    # Matriz H[r,c] = # de visitas de cualquier dron a la celda (r,c).
     H = np.zeros((rows, cols), dtype=np.int32)
     for route in routes:
         for (r, c) in route:
@@ -105,7 +105,7 @@ def compute_visit_heat(rows, cols, routes):
     return H
 
 def mask_obstacles(M, obstacles):
-    """Devuelve una copia float con NaN en obstáculos para que se vean ‘vacíos’."""
+    #Devuelve una copia float con NaN en obstáculos para que se vean ‘vacíos’.
     X = M.astype(float).copy()
     for (r, c) in obstacles:
         if 0 <= r < X.shape[0] and 0 <= c < X.shape[1]:

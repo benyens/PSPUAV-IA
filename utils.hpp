@@ -1,4 +1,3 @@
-// utils.hpp
 #pragma once
 #include <chrono>
 #include <string>
@@ -8,6 +7,9 @@
 #include <vector>
 #include <iomanip>
 
+// El propósito de este archivo es tener todas las funciones de utilidad
+// como pueden ser los prints para los diferentes tipos y un pequeño helper
+// para la creación y formato de los .csv
 // Timer simple
 struct Timer {
     using clock = std::chrono::high_resolution_clock;

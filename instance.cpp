@@ -4,6 +4,9 @@
 #include <cctype>
 #include <algorithm>
 #include <unordered_map>
+
+// La idea de este archivo es la lectura y formateo de las instancias entregadas
+
 // Helpers para validación y lectura
 static inline void expect(bool condition, const std::string& message) {
     if (!condition) {

@@ -3,6 +3,8 @@
 #include <string>
 #include <stdexcept>
 
+// Este archivo es solo una interfaz que crea la definición de instancia.
+
 // Definición de la instancia del problema
 struct Base{
     int id;

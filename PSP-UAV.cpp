@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
         std::string dump_json = "";      // si no vacío, vuelca snapshot JSON a esa ruta
         std::string outdir    = "resultados/showcase"; // <-- NUEVO (carpeta por defecto)
 
-        // Parseo opciones
+        // Parseo opciones para crear el binario
         for (int i=5; i<argc; ++i) {
             std::string a = argv[i];
             auto take = [&](const std::string& key)->std::string{
@@ -67,6 +67,7 @@ int main(int argc, char** argv) {
         Timer T_all; // tiempo total
 
         // =========================
+        
         print_section("INPUT");
         print_kv("instancia", path);
         print_kv("max_drones", max_drones);
@@ -189,10 +190,10 @@ int main(int argc, char** argv) {
         }
 
         // =========================
-        // HOOK de snapshot JSON (para visualización / animación)
+        // Con esto se crean los archivos .json para la posterior creación de gráficas y animaciones
         // Si no se entregó --dump, generamos un nombre automático dentro de outdir
         if (dump_json.empty()) {
-            try { fs::create_directories(outdir); } catch (...) { /* no fatal */ }
+            try { fs::create_directories(outdir); } catch (...) {}
             fs::path inst_path(path);
             std::string base = inst_path.stem().string(); // ej: PSP-UAV_01_a
             // Nombre: <inst>_g<gen>_p<pop>_n<Nmult>_s<seed>_snap.json
@@ -203,6 +204,8 @@ int main(int argc, char** argv) {
                                 "_s" + s(seed) + "_snap.json")).string();
         }
 
+        // Se crea esta instancia snapshot para poder hacer pruebas sin correr absolutamente todo el código
+        // En el makefile se refiere más a la compilación/uso de esto. 
         dump_run_snapshot(dump_json, instancia, data, max_drones, T,
                           ga.bestWalk, kernel, rutas);
         std::cout << "Dump JSON -> " << dump_json << "\n";
