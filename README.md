@@ -99,7 +99,19 @@ make run1a
 Ejecutar todas las instancias:
 
 ```bash
-make runs
+make all
+```
+
+Creación de csv's y pdf:
+
+```bash
+make sweep
+```
+
+Creación de gráficos y visualizaciones:
+
+```bash
+make vis
 ```
 
 Generar showcase completo (corrida + animación):
@@ -112,6 +124,12 @@ Limpiar binarios:
 
 ```bash
 make clean
+```
+
+Limpiar todo:
+
+```bash
+make deepclean
 ```
 
 Eliminar resultados experimentales:
@@ -170,31 +188,7 @@ Adaptado para el problema PSP-UAV dentro del curso INF-285 (UTFSM, 2025-2).
 
 ---
 
-## 9. Ejemplo de salida resumida
-
-```
-INPUT
-  instancia: PSP-UAV_01_a.txt
-  max_drones: 5
-  K: 1000
-  T: 50
-
-GA (paper)
-  population: 100
-  generations: 20
-  pcross: 0.7
-  pmut: 0.01
-  best_cost: 2178
-
-SIMULATION
-  urg_total: 66775
-  t_total_s: 3.62
-  Dump JSON -> resultados/showcase/PSP-UAV_01_a_g20_p100_s7.json
-```
-
----
-
-## 10. Observaciones
+## 9. Observaciones
 
 - El código fue diseñado para ser modular y reproducible.
 - Los scripts de Python requieren **matplotlib**, **numpy** y **Pillow**.
@@ -202,8 +196,3 @@ SIMULATION
 - El parámetro `--outdir` permite separar los resultados de experimentos y visualizaciones.
 
 ---
-
-## 11. Licencia
-
-Proyecto académico desarrollado en el marco del curso INF-285, Universidad Técnica Federico Santa María.  
-Uso educativo y no comercial.
