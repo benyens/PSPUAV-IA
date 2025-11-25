@@ -19,7 +19,7 @@ SRCS := PSP-UAV.cpp instance.cpp
 HDRS := instance.hpp sites.hpp pvp_ga.hpp pvp_fitness.hpp pvp_chromosome.hpp simulate.hpp utils.hpp dump_json.hpp
 
 # ---------- PYTHON ----------
-PYTHON := python
+PYTHON ?= python3
 SWEEP := sweep.py
 VIS := vis_snapshot.py
 SHOWCASE := showcase.py
