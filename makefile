@@ -1,11 +1,19 @@
 # ===========================================
 #  PSP-UAV  | Proyecto IA-PSP 2025
 # ===========================================
-.PHONY: all clean deepclean runs sweep vis showcase resultsclean
+.PHONY: all clean deepclean runs sweep vis showcase resultsclean dirs
 
 # ---------- COMPILADOR ----------
 CXX := g++
-CXXFLAGS := -std=c++17 -O2 -Wall -Wextra
+
+# DEBUG=1 -> compila con -g y sin optimizar
+DEBUG ?= 0
+ifeq ($(DEBUG),1)
+  CXXFLAGS := -std=c++17 -O0 -g -Wall -Wextra
+else
+  CXXFLAGS := -std=c++17 -O2 -Wall -Wextra
+endif
+
 TARGET := PSP-UAV
 SRCS := PSP-UAV.cpp instance.cpp
 HDRS := instance.hpp sites.hpp pvp_ga.hpp pvp_fitness.hpp pvp_chromosome.hpp simulate.hpp utils.hpp dump_json.hpp
@@ -27,9 +35,13 @@ SNAPDIR := $(RESDIR)/snapshots
 all: $(TARGET)
 
 $(TARGET): $(SRCS) $(HDRS)
-	@echo "Compilando $(TARGET)..."
+	@echo "Compilando $(TARGET) (DEBUG=$(DEBUG))..."
 	$(CXX) $(CXXFLAGS) -o $@ $(SRCS)
 	@echo "Binario listo: ./$(TARGET)"
+
+# ---------- CREAR DIRECTORIOS DE RESULTADOS ----------
+dirs:
+	@mkdir -p $(RESDIR) $(SHOWDIR) $(PDFDIR) $(SNAPDIR)
 
 # ---------- LIMPIEZAS ----------
 clean:
@@ -50,45 +62,58 @@ deepclean: clean
 	@echo "Todo limpio (binarios + resultados + gráficos)."
 
 # ---------- RUNS RÁPIDOS ----------
-run1a: $(TARGET)
+run1a: $(TARGET) dirs
 	./$(TARGET) $(INSTDIR)/PSP-UAV_01_a.txt 5 1000 50 --seed=7 --gen=20 --pop=100 --outdir=$(SHOWDIR)
-run1b: $(TARGET)
+
+run1b: $(TARGET) dirs
 	./$(TARGET) $(INSTDIR)/PSP-UAV_01_b.txt 5 1000 50 --outdir=$(SHOWDIR)
-run2a: $(TARGET)
+
+run2a: $(TARGET) dirs
 	./$(TARGET) $(INSTDIR)/PSP-UAV_02_a.txt 10 1000 50 --outdir=$(SHOWDIR)
-run2b: $(TARGET)
+
+run2b: $(TARGET) dirs
 	./$(TARGET) $(INSTDIR)/PSP-UAV_02_b.txt 10 1000 50 --outdir=$(SHOWDIR)
-run3a: $(TARGET)
+
+run3a: $(TARGET) dirs
 	./$(TARGET) $(INSTDIR)/PSP-UAV_03_a.txt 15 1000 50 --outdir=$(SHOWDIR)
-run3b: $(TARGET)
+
+run3b: $(TARGET) dirs
 	./$(TARGET) $(INSTDIR)/PSP-UAV_03_b.txt 15 1000 50 --outdir=$(SHOWDIR)
 
+# Ejecutar todas las instancias rápidas
+runs: run1a run1b run2a run2b run3a run3b
+
 # ---------- SHOWCASE (corre y visualiza la última instancia) ----------
-showcase: 
+# Run por defecto para el showcase
+SHOWCASE_RUN ?= run1a
+
+showcase: $(TARGET) dirs
 	@echo "Limpiando rastros de algún showcase anterior..."
 	@rm -rf $(SHOWDIR)
 	@rm -f *.csv *.json *.png *.pdf
-	make run1a
+	@mkdir -p $(SHOWDIR)
+	@echo "Ejecutando $(SHOWCASE_RUN) para el showcase..."
+	$(MAKE) $(SHOWCASE_RUN)
 	@echo "Ejecutando showcase y generando visualización..."
 	@latest=$$(ls -t $(SHOWDIR)/*.json 2>/dev/null | head -n1); \
 	if [ -z "$$latest" ]; then \
-	    echo "No hay snapshots en $(SHOWDIR)/. Ejecuta make run1a o cualquier otra instancia."; \
+	    echo "No hay snapshots en $(SHOWDIR)/. Ejecuta algún run primero."; \
 	else \
 	    echo "Usando snapshot: $$latest"; \
 	    $(PYTHON) $(SHOWCASE) --animate --fps 60; \
-		$(PYTHON)  $(VIS) "$$latest"; \
+	    $(PYTHON) $(VIS) "$$latest"; \
 	fi
 
 # ---------- BARRIDO Y VISUALIZACIÓN ----------
-sweep: $(TARGET) $(SWEEP)
+sweep: $(TARGET) dirs $(SWEEP)
 	@echo "Corriendo barrido completo de experimentos..."
 	$(PYTHON) $(SWEEP)
 
-vis: $(VIS)
+vis: dirs $(VIS)
 	@echo "Visualizando snapshot más reciente..."
 	@latest=$$(ls -t $(SNAPDIR)/*.json 2>/dev/null | head -n1); \
 	if [ -z "$$latest" ]; then \
-	    echo "No hay JSONs en $(SNAPDIR)/. Ejecuta primero un run con --dump o make showcase."; \
+	    echo "No hay JSONs en $(SNAPDIR)/. Ejecuta primero un run con --dump o make sweep."; \
 	else \
 	    echo "Mostrando $$latest"; \
 	    $(PYTHON) $(VIS) "$$latest"; \

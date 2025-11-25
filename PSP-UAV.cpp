@@ -109,7 +109,8 @@ int main(int argc, char** argv) {
         }
 
         // =========================
-        print_section("GA (paper)");
+        print_section("GA (urgency-based)");
+        
         // Largo del walk (N): m + m/Nmult (si Nmult=1 => 2*m, si Nmult=3 => ~1.33*m)
         int N = m + m / std::max(1, Nmult);
         // pesos
@@ -131,10 +132,11 @@ int main(int argc, char** argv) {
         print_kv("N", N);
 
         Timer T_ga;
-        auto ga = run_ga_pvp(data.dist, weights, m, N, params);
+        auto ga = run_ga_pvp_urgency(instancia, data, max_drones, T, m, N, params);
+
         double t_ga = T_ga.elapsed();
 
-        print_kv("best_cost", ga.bestCost, 6);
+        print_kv("best_urg_total", ga.bestCost, 6);
         print_kv("t_ga_s", t_ga, 6);
         std::cout << "  best_walk[0..min(30)]: ";
         for (size_t i=0; i<ga.bestWalk.size() && i<30; ++i) std::cout<<ga.bestWalk[i]<<" ";
@@ -179,7 +181,7 @@ int main(int argc, char** argv) {
         if (!csv_path.empty()) {
             std::vector<std::string> header = {
                 "tag","instancia","seed","pop","gen","N","m",
-                "best_cost","urg_total","t_load_s","t_sites_s","t_ga_s","t_sim_s","t_total_s"
+                "best_urg_total","urg_total","t_load_s","t_sites_s","t_ga_s","t_sim_s","t_total_s"
             };
             std::vector<std::string> row = {
                 tag, path, s(seed), s(params.population), s(params.generations), s(N), s(m),

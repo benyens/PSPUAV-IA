@@ -44,7 +44,7 @@ def sweep():
             writer = csv.writer(f)
             writer.writerow([
                 "tag","instancia","seed","pop","gen","N","m",
-                "best_cost","urg_total","t_load_s","t_sites_s","t_ga_s","t_sim_s","t_total_s"
+                "best_urg_total","urg_total","t_load_s","t_sites_s","t_ga_s","t_sim_s","t_total_s"
             ])
 
     for (inst, k, K, T), g, p, nm, seed in itertools.product(INSTANCES, GENS, POPS, NMULTS, SEEDS):
@@ -76,13 +76,13 @@ def make_reports():
     for inst_name, gdf in df.groupby("instancia_name"):
         pdf_path = PDF_DIR / f"{inst_name.replace('.txt','')}.pdf"
         with PdfPages(pdf_path) as pdf:
-            # Página 1: resumen tabla top por best_cost
-            top = gdf.sort_values("best_cost").head(15)[
-                ["tag","gen","pop","N","m","best_cost","urg_total","t_ga_s","t_sim_s","t_total_s"]
+            # Página 1: resumen tabla top por best_urg_total
+            top = gdf.sort_values("best_urg_total").head(15)[
+                ["tag","gen","pop","N","m","best_urg_total","urg_total","t_ga_s","t_sim_s","t_total_s"]
             ]
             fig = plt.figure(figsize=(11, 6))
             plt.axis("off")
-            plt.title(f"Resumen {inst_name} (Top por best_cost)", fontsize=14)
+            plt.title(f"Resumen {inst_name} (Top por best_urg_total)", fontsize=14)
             cell_text = top.values.tolist()
             cols = list(top.columns)
             table = plt.table(cellText=cell_text, colLabels=cols, loc="center")
@@ -90,12 +90,12 @@ def make_reports():
             table.scale(1, 1.3)
             pdf.savefig(fig); plt.close(fig)
 
-            # Página 2: best_cost vs generaciones (por pop)
+            # Página 2: best_urg_total vs generaciones (por pop)
             fig = plt.figure(figsize=(10,6))
             for pop, h in gdf.groupby("pop"):
-                plt.plot(h["gen"], h["best_cost"], marker="o", linestyle="-", label=f"pop={pop}")
-            plt.xlabel("Generaciones"); plt.ylabel("Best cost (max w_i * R(i))")
-            plt.title(f"{inst_name} — best_cost vs generaciones")
+                plt.plot(h["gen"], h["best_urg_total"], marker="o", linestyle="-", label=f"pop={pop}")
+            plt.xlabel("Generaciones"); plt.ylabel("Mejor urgencia acumulada")
+            plt.title(f"{inst_name} — best_urg_total vs generaciones")
             plt.legend(); plt.grid(True, alpha=0.3)
             pdf.savefig(fig); plt.close(fig)
 
@@ -108,12 +108,12 @@ def make_reports():
             plt.legend(); plt.grid(True, alpha=0.3)
             pdf.savefig(fig); plt.close(fig)
 
-            # Página 4: scatter best_cost vs urg_total (color por pop)
+            # Página 4: scatter pop vs t_total_s
             fig = plt.figure(figsize=(10,6))
             for pop, h in gdf.groupby("pop"):
-                plt.scatter(h["best_cost"], h["urg_total"], label=f"pop={pop}")
-            plt.xlabel("Best cost"); plt.ylabel("Urgencia acumulada")
-            plt.title(f"{inst_name} — tradeoff (best_cost vs urg_total)")
+                plt.scatter(h["pop"], h["t_total_s"], label=f"pop={pop}")
+            plt.xlabel("Poblaciónes"); plt.ylabel("Tiempo de ejecución total (s)")
+            plt.title(f"{inst_name} — Impacto del tamaño de población")
             plt.legend(); plt.grid(True, alpha=0.3)
             pdf.savefig(fig); plt.close(fig)
 

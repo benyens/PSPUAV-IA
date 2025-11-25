@@ -114,10 +114,16 @@ Creación de gráficos y visualizaciones:
 make vis
 ```
 
-Generar showcase completo (corrida + animación):
+Generar showcase completo (corrida + animación de la primera instancia):
 
 ```bash
 make showcase
+```
+
+Generar showcase de otra instancia definida: 
+
+```bash
+make showcase SHOWCASE_RUN={run} #Ej: run3a
 ```
 
 Limpiar binarios:

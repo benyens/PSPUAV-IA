@@ -45,43 +45,52 @@ inline void crossover(std::mt19937& rng, Chromosome& a, Chromosome& b, double pc
 }
 
 // Ejecuta el algoritmo genético para el PVP
-inline GAResult run_ga_pvp(const std::vector<std::vector<int>>& D, const std::vector<double>& w, int m, int N, GAParams P) {
+inline GAResult run_ga_pvp_urgency(
+    const Instance& instancia,
+    const PVPData& data,
+    int max_drones,
+    int T,
+    int m,
+    int N,
+    GAParams P
+) {
     std::mt19937 rng(P.seed);
 
+    // Contexto para fitness
+    PVPContext ctx{ &instancia, &data, max_drones, T };
+
+    // Función de evaluación usando FO del profesor
     auto eval = [&](const Chromosome& c)->std::pair<double, std::vector<int>>{
-        auto walk = decode(c); // Aquí se decodifica el cromosoma.
-        double cost = cost_max_weighted_revisit(walk, D, w);
+        double cost = fitness_urgency(c, ctx);
+        auto walk = decode_walk(c);
         return {cost, std::move(walk)};
     };
 
-    // Poblacion aleatoria inicial
+    // Población inicial
     std::vector<Chromosome> population(P.population);
     for (auto& c : population) c = randomChromosome(rng, m, N);
 
-    // Evaluar + orden (truncation)
-    std::vector<std::pair<double,Chromosome>> pool;
+    // Evaluación inicial
+    std::vector<std::pair<double, Chromosome>> pool;
     pool.reserve(P.population);
     for (const auto& c : population) {
         auto [cost, _] = eval(c);
         pool.push_back({cost, c});
     }
-
-    std::sort(pool.begin(), pool.end(), [](const auto& A, const auto& B){ return A.first < B.first; });
+    std::sort(pool.begin(), pool.end(), [](auto& A, auto& B){ return A.first < B.first; });
 
     GAResult result;
     result.bestChromosome = pool.front().second;
     result.bestWalk = eval(result.bestChromosome).second;
     result.bestCost = pool.front().first;
 
-    for (int g = 0; g<P.generations; ++g) {
-        // Nueva generación
+    // Evolución
+    for (int g = 0; g < P.generations; ++g) {
         std::vector<Chromosome> next;
         next.reserve(P.population);
 
-        // Elitismo: conservar el mejor
-        next.push_back(pool.front().second);
+        next.push_back(pool.front().second); // elitismo
 
-        // Rellenar nueva población
         for (int i = 0; (int)next.size() < P.population; ++i) {
             Chromosome a = pool[i % P.population].second;
             Chromosome b = pool[(i + 1) % P.population].second;
@@ -89,10 +98,9 @@ inline GAResult run_ga_pvp(const std::vector<std::vector<int>>& D, const std::ve
             mutate(rng, a, P.pmut);
             mutate(rng, b, P.pmut);
             next.push_back(std::move(a));
-            if ((int)next.size()<P.population) next.push_back(std::move(b));
+            if ((int)next.size() < P.population) next.push_back(std::move(b));
         }
 
-        // Evaluar + ordenar
         pool.clear();
         for (const auto& c : next) {
             auto [cost, _] = eval(c);
@@ -100,13 +108,16 @@ inline GAResult run_ga_pvp(const std::vector<std::vector<int>>& D, const std::ve
         }
         std::sort(pool.begin(), pool.end(), [](auto& A, auto& B){ return A.first < B.first; });
 
-        // Actualizar el mejor encontrado
         if (pool.front().first < result.bestCost) {
             result.bestCost = pool.front().first;
             result.bestChromosome = pool.front().second;
             result.bestWalk = eval(result.bestChromosome).second;
         }
-        result.history.push_back(pool.front().first); // costo mejor de la generación
+
+        result.history.push_back(pool.front().first);
     }
+
     return result;
 }
+
+

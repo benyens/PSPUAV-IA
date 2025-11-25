@@ -128,6 +128,36 @@ def animate_ticks(d, fps: float, outname: str):
     outgif = gifs_dir / f"{Path(outname).name}.gif"
     ani.save(outgif, writer=PillowWriter(fps=fps), dpi=150)
     print("Gif guardado:", outgif)
+
+    # Lo siguiente es para pasar el gif a sus frames, para poner la animación en el informe.
+    # ----------------------------------------------------------
+    #  OPCIÓN EXTRA: Exportar frames PNG de ALTA calidad
+    # ----------------------------------------------------------
+    frames_dir = Path("resultados/gifs/frames")
+    frames_dir.mkdir(parents=True, exist_ok=True)
+
+    for t in range(T):
+        fig_f, ax_f = base_axes(d["rows"], d["cols"], f"Tick {t+1}/{T}")
+        draw_obstacles(ax_f, d.get("obstacles", []))
+
+        for di, route in enumerate(routes):
+            xs = [p[1] for p in route[:t+1]]
+            ys = [p[0] for p in route[:t+1]]
+            color = colors[di % len(colors)]
+            ax_f.plot(xs, ys, lw=2.0, color=color, alpha=0.95)
+            if t < len(route):
+                ax_f.scatter(route[t][1], route[t][0], s=55, marker='s', color=color, zorder=5)
+
+        fig_f.savefig(
+            frames_dir / f"pspuav_{Path(outname).stem}_frame_{t:03d}.png",
+            dpi=250,
+            bbox_inches="tight"
+        )
+        plt.close(fig_f)
+
+    print("Frames PNG guardados en:", frames_dir)
+    # ----------------------------------------------------------
+
     return outgif
 
 # ----------------- main -----------------
