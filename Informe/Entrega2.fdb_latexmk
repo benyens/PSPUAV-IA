@@ -1,13 +1,13 @@
 # Fdb version 4
-["bibtex Entrega2"] 1764042352.44471 "Entrega2.aux" "Entrega2.bbl" "Entrega2" 1764042363.59078 0
+["bibtex Entrega2"] 1764042352.44471 "Entrega2.aux" "Entrega2.bbl" "Entrega2" 1764201727.2974 0
   "./Referencias.bib" 1764033330.36987 2804 17f116e1516e9fc294f0fc81d594d557 ""
   "C:/Users/benja/AppData/Local/Programs/MiKTeX/bibtex/bst/bibtex/plain.bst" 1291864736 20613 bd3fbfa9f64872b81ac57a0dd2ed855f ""
-  "Entrega2.aux" 1764042362.48752 6693 735c5d64a48ef11043acebfd65447288 "pdflatex"
+  "Entrega2.aux" 1764201726.28625 6693 735c5d64a48ef11043acebfd65447288 "pdflatex"
   (generated)
   "Entrega2.bbl"
   "Entrega2.blg"
   (rewritten before read)
-["pdflatex"] 1764042353.00722 "c:/Users/benja/Documents/IA/drones/Informe/Entrega2.tex" "Entrega2.pdf" "Entrega2" 1764042363.59155 0
+["pdflatex"] 1764201717.246 "c:/Users/benja/Documents/IA/drones/Informe/Entrega2.tex" "Entrega2.pdf" "Entrega2" 1764201727.29851 0
   "C:/Users/benja/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map" 1764033767.43867 279613 fe62a258ff6d99cc2243c3a2d16aa767 ""
   "C:/Users/benja/AppData/Local/MiKTeX/miktex/data/le/pdftex/pdflatex.fmt" 1764033421.407 24225047 a7fffc78686597037150895671f26e69 ""
   "C:/Users/benja/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/cm-super/cm-super-t1.enc" 1001775420 2971 def0b6c1f0b107b3b936def894055589 ""
@@ -153,10 +153,11 @@
   "C:/Users/benja/AppData/Local/Programs/MiKTeX/tex/latex/url/url.sty" 1388490452 12796 8edb7d69a20b857904dd0ea757c14ec9 ""
   "C:/Users/benja/AppData/Local/Programs/MiKTeX/tex/latex/zref/zref-abspage.sty" 1750428951 2269 2de6c7a5fd634dfef00a960544463a38 ""
   "C:/Users/benja/AppData/Local/Programs/MiKTeX/tex/latex/zref/zref-base.sty" 1750428951 20785 198a9cb2e04238d92c320d0d9edbd76a ""
-  "Entrega2.aux" 1764042362.48752 6693 735c5d64a48ef11043acebfd65447288 "pdflatex"
-  "Entrega2.bbl" 1764042352.86344 695 f4d492025aada83ca74fc220708e180c "bibtex Entrega2"
-  "Entrega2.out" 1764042362.48952 3107 76883afdbd183a194cd28bbb4d9649d8 "pdflatex"
-  "c:/Users/benja/Documents/IA/drones/Informe/Entrega2.tex" 1764042341.72893 24322 d9050ecdaab9ebfb0adf498102bab203 ""
+  "Entrega2.aux" 1764201726.28625 6693 735c5d64a48ef11043acebfd65447288 "pdflatex"
+  "Entrega2.bbl" 1764042370.33402 695 f4d492025aada83ca74fc220708e180c "bibtex Entrega2"
+  "Entrega2.out" 1764201726.28825 3107 76883afdbd183a194cd28bbb4d9649d8 "pdflatex"
+  "Entrega2.tex" 1764201716.36245 24254 9867f750ca013f6bd8deedaffa6d0d78 ""
+  "c:/Users/benja/Documents/IA/drones/Informe/Entrega2.tex" 1764201716.36245 24254 9867f750ca013f6bd8deedaffa6d0d78 ""
   "figuras/PSP-UAV_03_b.pdf" 1764033330.41294 32350 1dd007f5de185a220efbceb6aba5408e ""
   "figuras/PSP-UAV_03_b_g20_p100_n3_s12345_snap_grid.png" 1764033330.3929 618735 4db39174cffde2cf48372f821a8abe12 ""
   "figuras/PSP-UAV_03_b_g20_p100_n3_s12345_snap_heat.png" 1764033330.38339 56039 cee996569009b4724157cda5dd0790ec ""

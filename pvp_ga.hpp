@@ -59,7 +59,7 @@ inline GAResult run_ga_pvp_urgency(
     // Contexto para fitness
     PVPContext ctx{ &instancia, &data, max_drones, T };
 
-    // Función de evaluación usando FO del profesor
+    // Función de evaluación usando FO
     auto eval = [&](const Chromosome& c)->std::pair<double, std::vector<int>>{
         double cost = fitness_urgency(c, ctx);
         auto walk = decode_walk(c);

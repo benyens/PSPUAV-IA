@@ -50,16 +50,16 @@ clean:
 	@echo "Limpieza básica completa."
 
 resultsclean:
-	@echo "Limpiando solo resultados experimentales..."
+	@echo "Limpiando solo resultados experimentales... (menos los .pdf)"
 	@rm -rf $(RESDIR)
-	@rm -f *.csv *.json *.png *.pdf
+	@rm -f *.csv *.json *.png 
 	@echo "Resultados experimentales eliminados."
 
 deepclean: clean
 	@echo "Limpieza total..."
 	@rm -rf $(RESDIR)
-	@rm -f *.csv *.json *.png *.pdf
-	@echo "Todo limpio (binarios + resultados + gráficos)."
+	@rm -f *.csv *.json *.png
+	@echo "Todo limpio (binarios + resultados + gráficos (menos los .pdf))."
 
 # ---------- RUNS RÁPIDOS ----------
 run1a: $(TARGET) dirs
@@ -90,7 +90,7 @@ SHOWCASE_RUN ?= run1a
 showcase: $(TARGET) dirs
 	@echo "Limpiando rastros de algún showcase anterior..."
 	@rm -rf $(SHOWDIR)
-	@rm -f *.csv *.json *.png *.pdf
+	@rm -f *.csv *.json *.png 
 	@mkdir -p $(SHOWDIR)
 	@echo "Ejecutando $(SHOWCASE_RUN) para el showcase..."
 	$(MAKE) $(SHOWCASE_RUN)
