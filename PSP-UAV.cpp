@@ -209,7 +209,7 @@ int main(int argc, char** argv) {
         // Se crea esta instancia snapshot para poder hacer pruebas sin correr absolutamente todo el código
         // En el makefile se refiere más a la compilación/uso de esto. 
         dump_run_snapshot(dump_json, instancia, data, max_drones, T,
-                          ga.bestWalk, kernel, rutas);
+                          ga.bestWalk, kernel, rutas, t_all);
         std::cout << "Dump JSON -> " << dump_json << "\n";
 
         return 0;
